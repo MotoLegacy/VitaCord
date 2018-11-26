@@ -52,6 +52,7 @@ class VitaGUI{
 		int analogScrollLeft(int x , int y);
 		std::vector<std::string> loginTexts;
 		std::string loadingString = "";
+		std::string userString = "";
 		
 		void SetState(int s);
 		int GetState();

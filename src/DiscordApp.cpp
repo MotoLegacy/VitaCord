@@ -369,7 +369,8 @@ void DiscordApp::doLogin(){
 	int loginR = discord.login();
 	if(loginR  == 200){
 		logSD("Login Success");
-		vitaGUI.loadingString = "Loading your stuff , " + discord.getUsername();
+		vitaGUI.loadingString = "CALIBRATING FLUX CAPACITORS";
+		vitaGUI.userString = "Logged in as " + discord.getUsername();
 		saveUserDataToFile(discord.getEmail() , discord.getPassword() , discord.getToken());
 		discord.loadData();
 		logSD("Loaded data");
@@ -378,7 +379,8 @@ void DiscordApp::doLogin(){
 		int login2faResponse = discord.submit2facode(vitaIME.getUserText(get2facodeTitle));
 		if( login2faResponse == 200){
 			logSD("Login (2FA) Success");
-			vitaGUI.loadingString = "Wait a second " + discord.getUsername();
+			vitaGUI.loadingString = "CALIBRATING FLUX CAPACITORS";
+			vitaGUI.userString = "Check status.discordapp.com";
 			saveUserDataToFile(discord.getEmail() , discord.getPassword() , discord.getToken());
 			discord.loadData();
 			logSD("Loaded data");

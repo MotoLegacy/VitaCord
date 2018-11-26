@@ -133,7 +133,7 @@ void VitaGUI::updateBoxes(){
 
 void VitaGUI::DrawStatusBar() {
 	
-	vita2d_draw_rectangle(0, 0, 960, 30, RGBA8(174, 85, 44, 255));
+	vita2d_draw_rectangle(0, 0, 960, 30, RGBA8(35, 39, 42, 255));
 	vita2d_draw_texture(statbarIconImage, 10, 7);
 	
 	// Battery
@@ -209,7 +209,8 @@ void VitaGUI::Draw(){
 		
 		DrawLoginScreen();
 		
-		for(unsigned int drawEmojiTest = 0; drawEmojiTest <  discordPtr->emojiTestArray.size() ; drawEmojiTest++){
+		//MotoLegacy - Emoji test scrolling, removed because.. why was it here?
+		/*for(unsigned int drawEmojiTest = 0; drawEmojiTest <  discordPtr->emojiTestArray.size() ; drawEmojiTest++){
 			
 			vita2d_draw_texture_part(discordPtr->spritesheetEmoji 
 				, emojiTestScrollX + discordPtr->emojiMap[discordPtr->emojiTestArray[drawEmojiTest]].x * discordPtr->emojiWidth
@@ -218,7 +219,7 @@ void VitaGUI::Draw(){
 				, discordPtr->emojiMap[discordPtr->emojiTestArray[drawEmojiTest]].y * discordPtr->emojiHeight
 				, discordPtr->emojiWidth
 				, discordPtr->emojiHeight );
-		}
+		}*/
 		
 		/*if(texA != NULL){
 			vita2d_draw_texture( texA , 0 , 72);
@@ -261,7 +262,9 @@ void VitaGUI::Draw(){
 			loadingImageAngle += 0.25f;
 		}
 		// text
+		//MotoLegacy - TODO: Center text instead of using fix nums
 		vita2d_font_draw_text(vita2dFont[25] , 300, 355, RGBA8(255,255,255,255), 25, loadingString.c_str());
+		vita2d_font_draw_text(vita2dFont[25] , 350, 375, RGBA8(255,255,255,255), 25, userString.c_str());
 		
 
 		
@@ -1178,32 +1181,78 @@ void VitaGUI::DrawChannelsOnSidebar(){
 
 void VitaGUI::DrawMessages(){
 	
-	int yPos = messageScrollY + 40 , height;
+	int yPos = messageScrollY + 40, height;
 	unsigned int messageBoxesAmount = messageBoxes.size();
 	
 	for(unsigned int i =  0 ; i < messageBoxesAmount ; i++){
 		
 		height = messageBoxes[i].messageHeight;
 		
-		if(yPos < MAX_DRAW_HEIGHT && yPos > MIN_DRAW_HEIGHT){
-			
-			
-			if(i == messageBoxesAmount-1){
-				
-				vita2d_draw_rectangle(242, yPos + height - 1, 706, 1, RGBA8(120, 115, 120, 255)); 
-				vita2d_draw_rectangle(240, yPos + height , 710, 1, RGBA8(100, 100, 100, 255)); 
-				vita2d_draw_rectangle(242, yPos + height + 1, 706, 1, RGBA8(120, 115, 120, 255)); 
-			}else{
-				vita2d_draw_rectangle(242, yPos + height - 1, 706, 1, RGBA8(62, 65, 70, 255));
-				vita2d_draw_rectangle(240, yPos + height, 710, 1, RGBA8(51, 53, 55, 255)); 
-				vita2d_draw_rectangle(242, yPos + height + 1, 706, 1, RGBA8(62, 65, 70, 255)); 
-				
+		if (yPos < MAX_DRAW_HEIGHT && yPos > MIN_DRAW_HEIGHT) {
+
+			/* 
+			   =================================
+			    MOTOLEGACY - MESSAGE FORMATTING
+			   ================================= 
+			   Chained messages (from the same user) no longer draw as
+			   separate messages (with usernames and (soon) timestamps).
+
+			   ISSUES:
+			   * Spacing issues due to height inconsistency
+			   * Messing with height also messes with how scrolling works,
+			   causes jumping.
+			*/
+
+
+
+			//text
+			if (messageBoxes[i].username != messageBoxes[i - 1].username) {
+				vita2d_draw_texture(userIconDefaultImage, 243, yPos + 16); //icon
+				vita2d_font_draw_text(vita2dFont[26], 283, yPos + 26, RGBA8(255, 255, 255, 255), 26, messageBoxes[i].username.c_str()); //username
+				vita2d_font_draw_text(vita2dFont[26], 283, yPos + 50, RGBA8(255, 255, 255, 255), 26, messageBoxes[i].content.c_str()); //text
+			} else { //chainpost
+				vita2d_font_draw_text(vita2dFont[26], 283, yPos - 10, RGBA8(255, 255, 255, 255), 26, messageBoxes[i].content.c_str());
+				height -= 66;
+			}
+
+			//emoji
+			/*for(unsigned int em = 0; em < messageBoxes[i].emojis.size() ; em++){
+				if(discordPtr->spritesheetEmoji  != NULL){
+					vita2d_draw_texture_part(discordPtr->spritesheetEmoji 
+					, 283 + ( messageBoxes[i].emojis[em].posX * discordPtr->emojiWidth )
+					, yPos + 32 + messageBoxes[i].emojis[em].posY * discordPtr->emojiHeight
+					, messageBoxes[i].emojis[em].spriteSheetX * discordPtr->emojiWidth
+					, messageBoxes[i].emojis[em].spriteSheetY * discordPtr->emojiHeight
+					, discordPtr->emojiWidth
+					, discordPtr->emojiHeight );
+				}
+			}*/
+
+
+			/*
+			//normal conversation
+			if (messageBoxes[i].username != messageBoxes[i - 1].username) {
+				vita2d_draw_texture(userIconDefaultImage, 243, yPos + 16); //icon
+				vita2d_font_draw_text(vita2dFont[26], 283, yPos + 26, RGBA8(255, 255, 255, 255), 26, messageBoxes[i].username.c_str()); //username
+				vita2d_font_draw_text(vita2dFont[32], 293, yPos + 50, RGBA8(255, 255, 255, 255), 32, messageBoxes[i].content.c_str()); //text
+
+				if (i == messageBoxesAmount-1) {
+					vita2d_draw_rectangle(242, yPos + height - 1, 706, 1, RGBA8(120, 115, 120, 255)); 
+					vita2d_draw_rectangle(240, yPos + height , 710, 1, RGBA8(100, 100, 100, 255)); 
+					vita2d_draw_rectangle(242, yPos + height + 1, 706, 1, RGBA8(120, 115, 120, 255)); 
+				} else {
+					vita2d_draw_rectangle(242, yPos + height - 1, 706, 1, RGBA8(62, 65, 70, 255));
+					vita2d_draw_rectangle(240, yPos + height, 710, 1, RGBA8(51, 53, 55, 255)); 
+					vita2d_draw_rectangle(242, yPos + height + 1, 706, 1, RGBA8(62, 65, 70, 255)); 
+				}
+
+			} else { //chainpost
+				vita2d_font_draw_text(vita2dFont[32], 293, yPos, RGBA8(255, 255, 255, 255), 32, messageBoxes[i].content.c_str());
 			}
 			
-				vita2d_font_draw_text(vita2dFont[26], 283, yPos + 26, RGBA8(255, 255, 255, 255), 26, messageBoxes[i].username.c_str());
-				vita2d_font_draw_text(vita2dFont[32], 293, yPos + 50, RGBA8(255, 255, 255, 255), 32, messageBoxes[i].content.c_str());
 				 
-			if( messageBoxes[i].showAttachmentAsImage ){
+			if (messageBoxes[i].showAttachmentAsImage) {
+				//it would be better to just alert the user that attachments aren't yet supported..
 				vita2d_draw_rectangle( 240 , yPos + height - ATTACHMENT_HEIGHT - 16 , ATTACHMENT_HEIGHT , ATTACHMENT_HEIGHT , RGBA8(0x9F , 0x9F , 0x9F , 0xFF) );
 				if( i < discordPtr->guilds[discordPtr->currentGuild].channels[discordPtr->currentChannel].messages.size() ){
 					if ( discordPtr->guilds[discordPtr->currentGuild].channels[discordPtr->currentChannel].messages[i].attachment.loadedThumbImage == true ){
@@ -1215,6 +1264,7 @@ void VitaGUI::DrawMessages(){
 					}
 				}
 				vita2d_font_draw_text(vita2dFont[24] ,  240 + ATTACHMENT_HEIGHT + 8 , yPos + height - 32 , RGBA8(255, 255, 255, 255), 24 , messageBoxes[i].attachmentFullText.c_str() );
+				vita2d_font_draw_text(vita2dFont[32], 293, yPos + height - 32, RGBA8(255, 255, 255, 255), 32, "VCERR: Attachments are not yet supported by VitaCord!"); //text
 			}else if( messageBoxes[i].showAttachmentAsBinary ){
 				vita2d_draw_rectangle( 240 , yPos + height - ATTACHMENT_HEIGHT - 16 , ATTACHMENT_HEIGHT , ATTACHMENT_HEIGHT , RGBA8(0x9F , 0x9F , 0x9F , 0xFF) );
 				
@@ -1235,16 +1285,9 @@ void VitaGUI::DrawMessages(){
 					, discordPtr->emojiWidth
 					, discordPtr->emojiHeight );
 				}
-			}
-				
-			// draw default icon.
-			// When user icons is implemented, add vita2d_texture pointer to user data.
-			// Then apply either the default icon pointer or loaded user icon pionter to this vita2d_texture pointer.
-			// For now we'll just draw the default icon for all users.
-			vita2d_draw_texture(userIconDefaultImage, 243, yPos + 16);
+			}*/
 		}
 
-		
 		yPos += height; // add message height to yPos
 		
 	}
